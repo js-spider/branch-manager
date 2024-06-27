@@ -1,11 +1,16 @@
 {
   "name": "@js-spider/branch-manage",
-  "version": "1.0.1",
+  "version": "1.0.6",
   "description": "",
   "main": "src/index.js",
   "bin": {
-    "cwb": "lib/index.js"
+    "cwb": "bin/index.js"
   },
+  "files": [
+    "lib",
+    "bin",
+    "src"
+  ],
   "scripts": {
     "postinstall": "node ./src/postInstall.js",
     "build": "rollup -c",

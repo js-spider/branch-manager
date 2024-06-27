@@ -7,23 +7,27 @@ const git = simpleGit({
 
 // 初始化git
 function initGit(){
-  return git.raw(['init']).then(()=>{
-    console.log('src/gitCtr.js/11 >>>>>> ',1232);
-  })
+  return git.raw(['init'])
 }
 
 // 添加remote
 function addRemote(stash){
-  const list = Object.values(stash)
-  git.getRemotes().then((remoteList)=>{
-    const needAdd = list.filter(item => {
-      return !remoteList.find((it)=> it.name === item.name)
-    })
-    if(Array.isArray(needAdd) && needAdd.length){
-      needAdd.forEach(item =>{
-        git.addRemote(item.name,item.repo)
+  const promiseAll = []
+  return new Promise((resolve)=>{
+    const list = Object.values(stash)
+    git.getRemotes().then((remoteList)=>{
+      const needAdd = list.filter(item => {
+        return !remoteList.find((it)=> it.name === item.name)
       })
-    }
+      if(Array.isArray(needAdd) && needAdd.length){
+        needAdd.forEach(item =>{
+          promiseAll.push(git.addRemote(item.name,item.repo))
+        })
+      }
+      return Promise.all(promiseAll)
+    }).finally(()=>{
+      resolve(promiseAll)
+    })
   })
 }
 

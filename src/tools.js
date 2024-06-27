@@ -9,7 +9,8 @@ const defaultWhiteList = ['master', 'test', 'develop']
 const dateMapping = {
   'M': 'month',
   'Y': 'year',
-  'D': 'day'
+  'D': 'day',
+  'H': 'hour'
 }
 
 
@@ -42,49 +43,63 @@ function nextStep(arr, onDelete){
   })
 }
 
-function deleteSingle(remote, stash){
+function searchSingle(remote, stash){
   const current = stash[remote]
   if(current){
     const whiteList = current.whiteList.map(item => `${remote}/${item}`)
     const expiredDate = expiredFormat(current.expired)
-    return new Promise((resolve)=>{
-      gitCtr.getBranchListWithDate(remote).then((res)=>{
-        const list = res.filter(({ branch, date }) => {
-          const expired = moment(date).isBefore(expiredDate)
-          if(whiteList.includes(branch)){
-            return false
-          }else if(expired){
-            return true
-          }
+    return gitCtr.getBranchListWithDate(remote).then((res)=>{
+      const list = res.filter(({ branch, date }) => {
+        const expired = moment(date).isBefore(expiredDate)
+        if(whiteList.includes(branch)){
           return false
-        })
-        if(list.length){
-          const promiseArr = []
-          console.log(chalk.blue('删除分支列表:'))
-          list.forEach((item)=>{
-            console.log(chalk.blue(item.date), '::::', chalk.blue(item.branch))
-            const branchName = item.branch.replace(`${remote}/`, '')
-            promiseArr.push(gitCtr.deleteRemoteBranch(remote,branchName).then(res =>{
-              console.log(chalk.green(`${remote}的远程分支${branchName}已删除`))
-            }))
-          })
-          Promise.all(promiseArr).then(()=>{
-            resolve()
-          })
-        }else{
-          console.log(chalk.bgGreenBright(`${remote}无过期分支`))
-          resolve()
+        }else if(expired){
+          return true
         }
+        return false
       })
+      if(list.length){
+        console.log(chalk.blue('待删除分支列表:'))
+        list.forEach((item)=>{
+          console.log(chalk.blue(item.date), '::::', chalk.blue(item.branch))
+        })
+        return list
+      }else{
+        console.log(chalk.bgGreenBright(`${remote}无过期分支`))
+        return []
+      }
     })
   }else{
     return Promise.resolve()
   }
 }
 
+function deleteSingle(remote, stash){
+  return new Promise((resolve)=>{
+    searchSingle(remote,stash).then((list)=>{
+      console.log('src/tools.js/74 >>>>>> ',list);
+      if(Array.isArray(list) && list.length){
+        const promiseArr = []
+        list.forEach((item)=>{
+          const branchName = item.branch.replace(`${remote}/`, '')
+          promiseArr.push(gitCtr.deleteRemoteBranch(remote,branchName).then(res =>{
+            console.log(chalk.green(`${remote}的远程分支${branchName}已删除`))
+          }))
+        })
+        Promise.all(promiseArr).then(()=>{
+          resolve()
+        })
+      }else{
+        resolve()
+      }
+    })
+  })
+}
+
 
 module.exports = {
   defaultWhiteList,
+  searchSingle,
   deleteSingle,
   nextStep,
   writeJsonSync,

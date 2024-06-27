@@ -22,6 +22,11 @@ program
   .argument('[expired]', '指定过期时间,已过期的分支可以被删除')
   .action(actions.onAdd);
 
+program
+  .command('check')
+  .description('检查指定remote对应的过期分支列表')
+  .argument('<name>', 'remote 名称')
+  .action(actions.onSearch);
 
 program
   .command('rmr')

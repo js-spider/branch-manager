@@ -25,10 +25,15 @@ function onAdd(name,repo,whiteList,expired){
     console.log(chalk.red(`仓库repo重复: 已存在仓库<${repoExist.name}>:[${repoExist}]`))
     return ;
   }
-  if(whiteList){
-    const str = whiteList.slice(1,-1)
-    if(str && str.length){
-      whiteList = str.split(',').map(item => item.trim())
+  if(whiteList && whiteList !== '[]'){
+    if(whiteList.startsWith('[') && whiteList.endsWith(']')){
+      const str = whiteList.slice(1,-1)
+      if(str && str.length){
+        whiteList = str.split(',').map(item => item.trim())
+      }
+    }else if(whiteList.match(/^\d{1,2}[hHMmYydD]{1}$/)) {
+      expired = whiteList
+      whiteList = []
     }
   }else{
     whiteList = []
@@ -43,7 +48,14 @@ function onAdd(name,repo,whiteList,expired){
     whiteList
   }
   tools.writeJsonSync(stash)
-  gitCtr.addRemote(stash)
+  gitCtr.addRemote(stash).then((added)=>{
+    if(Array.isArray(added) && added.length){
+      console.log(chalk.green('添加成功,查看列表如下:'))
+      onList()
+    }else{
+      console.log(chalk.red('未添加任何remote'))
+    }
+  })
 }
 
 // 删除分支
@@ -67,6 +79,15 @@ function onDelete(remote){
   }
 }
 
+// 删除分支
+function onSearch(remote){
+  const { stash } = tools.getStashInfo()
+  if(remote){
+    console.log(chalk.cyan(`正在检查${remote}的过期分支 ...`))
+    return tools.searchSingle(remote, stash)
+  }
+}
+
 // 删除本地仓库
 function onDeleteRemote(remote){
 
@@ -81,6 +102,7 @@ function onDeleteRemote(remote){
 module.exports = {
   onList,
   onAdd,
+  onSearch,
   onDelete,
   onDeleteRemote
 }
