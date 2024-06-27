@@ -10,17 +10,39 @@ const dateMapping = {
   'M': 'month',
   'Y': 'year',
   'D': 'day',
-  'H': 'hour'
+  'H': 'hour',
+  'F': 'minute'
 }
 
+function outputJson(item){
+  console.log(
+    chalk.yellowBright('{ ') +
+    chalk.greenBright('name:') +
+    chalk.cyan(item.name) +
+    chalk.greenBright(', repo:') +
+    chalk.cyan(item.repo) +
+    chalk.greenBright(', expired:')+
+    chalk.cyan(item.expired)+
+    chalk.greenBright(', whiteList:')+
+    chalk.cyan(`[${item.whiteList.join(',')}]`)+
+    chalk.yellowBright(' }')
+  )
+}
 
 // 获取已有仓库列表
 function getStashInfo(){
-  const stash = require('./stash.json')
-  const stashList = Object.values(stash)
-  return {
-    stash,
-    list: stashList
+  try{
+    const stash = fs.readJsonSync(path.resolve(__dirname,'./stash.json'))
+    const stashList = Object.values(stash)
+    return {
+      stash,
+      list: stashList
+    }
+  }catch(e){
+    return {
+      stash: {},
+      list: []
+    }
   }
 }
 
@@ -77,7 +99,6 @@ function searchSingle(remote, stash){
 function deleteSingle(remote, stash){
   return new Promise((resolve)=>{
     searchSingle(remote,stash).then((list)=>{
-      console.log('src/tools.js/74 >>>>>> ',list);
       if(Array.isArray(list) && list.length){
         const promiseArr = []
         list.forEach((item)=>{
@@ -99,6 +120,7 @@ function deleteSingle(remote, stash){
 
 module.exports = {
   defaultWhiteList,
+  outputJson,
   searchSingle,
   deleteSingle,
   nextStep,
