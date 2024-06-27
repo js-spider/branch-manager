@@ -1,0 +1,12 @@
+{
+  "webpack": {
+    "name": "webpack",
+    "repo": "git@github.com:js-spider/webpack-test.git",
+    "expired": "3M",
+    "whiteList": [
+      "master",
+      "test",
+      "develop"
+    ]
+  }
+}
