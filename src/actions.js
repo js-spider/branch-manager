@@ -48,7 +48,7 @@ function onAdd(name,repo, expired, whiteList){
     console.log(chalk.red(`仓库repo重复: 已存在仓库<${repoExist.name}>:[${repoExist}]`))
     return ;
   }
-  if(expired.startsWith('[')){
+  if(expired && expired.startsWith('[')){
     whiteList.unshift(expired)
     whiteList = whiteList.join('')
     expired = undefined
