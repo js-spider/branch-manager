@@ -21,7 +21,7 @@ program
 
 program
   .command('add')
-  .description('添加仓库')
+  .description('添加仓库 name:本地名称 repo: 仓库地址 expired: 过期时间包括[YyMmDdHhFf]代表[年月日时分] whiteList:白名单 如:[master,develop]')
   .argument('<name>', '定义仓库名称')
   .argument('<repo>', 'git远程仓库地址')
   .argument('[expired]', '指定过期时间,已过期的分支可以被删除')
